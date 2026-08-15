@@ -52,6 +52,21 @@ export default {
       if (url.pathname.startsWith("/api/auth")) {
         return await auth.handler(request);
       }
+      
+      if (request.method === "POST") {
+        if (url.pathname === "/api/questions") {
+          const { handleApiQuestions } = await import("./server/api-handlers");
+          return await handleApiQuestions(request);
+        }
+        if (url.pathname === "/api/call") {
+          const { handleApiCall } = await import("./server/api-handlers");
+          return await handleApiCall(request);
+        }
+        if (url.pathname === "/api/chat") {
+          const { handleApiChat } = await import("./server/api-handlers");
+          return await handleApiChat(request);
+        }
+      }
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);

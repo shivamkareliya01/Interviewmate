@@ -23,7 +23,7 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { 
       preset: 'cloudflare',
-      entry: "server" 
+      entry: "./src/server.ts" 
     },
   },
 });
