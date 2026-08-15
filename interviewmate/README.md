@@ -1,8 +1,5 @@
 # Interview Mate
 
-Lovable Prompt: InterviewMate
-
-Paste everything below into Lovable as your first message.
 
 Build a full-stack web app called InterviewMate — an AI-powered technical interview practice platform. Use React + Vite + TypeScript + Tailwind + shadcn/ui for the frontend, and Supabase for auth, database, and backend logic (Postgres + Row Level Security + Edge Functions).
 
