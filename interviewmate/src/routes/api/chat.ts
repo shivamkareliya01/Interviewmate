@@ -1,9 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createAPIFileRoute } from "@tanstack/react-start/api";
 
-export const Route = createFileRoute("/api/chat")({
-  server: {
-    handlers: {
-      POST: async ({ request }) => {
+export const Route = createAPIFileRoute("/api/chat")({
+  POST: async ({ request }) => {
         try {
           const body = await request.json();
           const { messages } = body;
@@ -61,7 +59,5 @@ export const Route = createFileRoute("/api/chat")({
           console.error("[Groq Server API Error]:", err);
           return new Response("Internal Server Error", { status: 500 });
         }
-      },
-    },
   },
 });

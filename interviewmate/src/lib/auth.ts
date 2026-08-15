@@ -24,16 +24,29 @@ if (!clientId || !clientSecret) {
   console.log(`[Better Auth] Configured Google Auth for Client ID: ${clientId.slice(0, 20)}...`);
 }
 
-export const auth = betterAuth({
-  secret,
-  baseURL,
-  emailAndPassword: {
-    enabled: true,
-  },
-  socialProviders: {
-    google: {
-      clientId,
-      clientSecret,
+let authInstance: ReturnType<typeof betterAuth>;
+try {
+  authInstance = betterAuth({
+    secret,
+    baseURL,
+    emailAndPassword: {
+      enabled: true,
     },
-  },
-});
+    socialProviders: {
+      google: {
+        clientId,
+        clientSecret,
+      },
+    },
+  });
+} catch (error) {
+  console.warn("Failed to initialize betterAuth. This usually means a database configuration is missing.", error);
+  authInstance = {
+    handler: async (req: any) => new Response(JSON.stringify({ error: "Auth misconfigured" }), { status: 500 }),
+    api: {
+      getSession: async () => null
+    }
+  } as any;
+}
+
+export const auth = authInstance;
