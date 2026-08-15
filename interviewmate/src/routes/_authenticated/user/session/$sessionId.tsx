@@ -241,6 +241,8 @@ function SessionPage() {
 
       if (updated) {
         setSession(updated);
+        setCurrentIndex(0);
+        initQuestionIndex(updated, 0);
         toast.success("10 questions generated & ready!");
       }
     } catch (err) {
@@ -290,38 +292,16 @@ function SessionPage() {
     if (!session || questions.length <= currentIndex) return;
 
     const currentQ = questions[currentIndex];
-    const currentAnswers = session.mcqAnswers || {};
-    if (currentAnswers[currentQ.id] !== undefined) return; // Already answered
-
-    const updatedAnswers = { ...currentAnswers, [currentQ.id]: selectedIndex };
-    const newMcqScore = isCorrect ? (session.mcqScore || 0) + 1 : session.mcqScore;
+    const updatedAnswers = { ...(session.mcqAnswers || {}), [currentQ.id]: selectedIndex };
+    const updatedScore = (session.mcqScore || 0) + (isCorrect ? 1 : 0);
 
     const updatedSession = updateSessionRecord(session.id, {
       mcqAnswers: updatedAnswers,
-      mcqScore: newMcqScore,
+      mcqScore: updatedScore,
     });
+
     if (updatedSession) setSession(updatedSession);
   };
-
-  const handleCodingEvaluated = (scoreBreakdown: ScoreBreakdown) => {
-    if (!session) return;
-    const currentCodingScores = session.codingScores || {};
-    const updatedCodingScores = { ...currentCodingScores, [currentIndex]: scoreBreakdown.overallScore };
-    const scoreValues = Object.values(updatedCodingScores);
-    const averageCodingScore = Math.round(
-      scoreValues.reduce((sum, s) => sum + s, 0) / scoreValues.length
-    );
-
-    const updatedSession = updateSessionRecord(session.id, {
-      codingScores: updatedCodingScores,
-      codingScore: averageCodingScore,
-    });
-
-    if (updatedSession) {
-      setSession(updatedSession);
-    }
-  };
-
 
   // Move to Next Question
   const handleNextQuestion = () => {

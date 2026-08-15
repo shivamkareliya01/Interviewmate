@@ -407,9 +407,8 @@ function DashboardPage() {
             ...prev.messages,
             {
               sender: "ai",
-              text: `Evaluation complete! Overall score: ${res.overallScore}/100 (${execSummary}). ${
-                res.feedback[0]?.text || "Great effort!"
-              }`,
+              text: `Evaluation complete! Overall score: ${res.overallScore}/100 (${execSummary}). ${res.feedback[0]?.text || "Great effort!"
+                }`,
             },
           ],
         };
@@ -515,7 +514,7 @@ function DashboardPage() {
     return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
   };
 
-  const displayName = profile?.first_name || user?.name?.split(" ")?.[0] || "Candidate";
+  const displayName = profile?.first_name || user?.name?.split(" ")[0] || "Candidate";
   const displayScores = activeChallenge.evaluation
     ? activeChallenge.evaluation.scores
     : { correctness: 0, efficiency: 0, codeQuality: 0, testCases: 0, overallScore: 0 };
@@ -524,8 +523,8 @@ function DashboardPage() {
     ? overall >= 85
       ? "Great!"
       : overall >= 65
-      ? "Good"
-      : "Needs work"
+        ? "Good"
+        : "Needs work"
     : "Pending";
   const wordCount = activeChallenge.code.trim().split(/\s+/).filter(Boolean).length;
 
@@ -622,13 +621,12 @@ function DashboardPage() {
 
               <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                 <span
-                  className={`px-2.5 py-1 rounded-lg text-xs font-bold ${
-                    activeDifficulty === "Easy"
+                  className={`px-2.5 py-1 rounded-lg text-xs font-bold ${activeDifficulty === "Easy"
                       ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-400"
                       : activeDifficulty === "Moderate"
-                      ? "bg-amber-500/10 border border-amber-500/30 text-amber-400"
-                      : "bg-red-500/10 border border-red-500/30 text-red-400"
-                  }`}
+                        ? "bg-amber-500/10 border border-amber-500/30 text-amber-400"
+                        : "bg-red-500/10 border border-red-500/30 text-red-400"
+                    }`}
                 >
                   {activeDifficulty}
                 </span>
@@ -853,9 +851,8 @@ function DashboardPage() {
               {activeChallenge.messages.map((m, i) => (
                 <div
                   key={i}
-                  className={`flex items-start gap-2 text-xs ${
-                    m.sender === "user" ? "justify-end" : "justify-start"
-                  }`}
+                  className={`flex items-start gap-2 text-xs ${m.sender === "user" ? "justify-end" : "justify-start"
+                    }`}
                 >
                   {m.sender === "ai" && (
                     <div className="size-6 rounded-lg bg-teal-500/20 text-teal-400 flex items-center justify-center flex-shrink-0 mt-0.5 border border-teal-500/30">
@@ -863,11 +860,10 @@ function DashboardPage() {
                     </div>
                   )}
                   <div
-                    className={`p-3 rounded-2xl max-w-[88%] text-xs leading-relaxed ${
-                      m.sender === "user"
+                    className={`p-3 rounded-2xl max-w-[88%] text-xs leading-relaxed ${m.sender === "user"
                         ? "bg-teal-500/20 text-teal-200 border border-teal-500/30 rounded-tr-none"
                         : "bg-slate-950 text-slate-200 border border-slate-800/80 rounded-tl-none shadow-inner"
-                    }`}
+                      }`}
                   >
                     <ChatMessageContent content={m.text} sender={m.sender} activeLanguage={activeChallenge.language} />
                   </div>
@@ -898,11 +894,10 @@ function DashboardPage() {
                 }}
                 placeholder="Ask AI Interviewer or paste code... (Shift+Enter for newline)"
                 rows={1}
-                className={`flex-1 bg-slate-950 border border-slate-800 text-xs text-slate-200 placeholder:text-slate-500 rounded-xl px-3 py-2.5 resize-none focus:outline-none focus:border-teal-500/50 transition-colors max-h-56 min-h-[42px] leading-relaxed ${
-                  prompt.includes("\n") || /\b(def|function|class|import|return|buckets|for|if|while|const|let|var)\b/.test(prompt)
+                className={`flex-1 bg-slate-950 border border-slate-800 text-xs text-slate-200 placeholder:text-slate-500 rounded-xl px-3 py-2.5 resize-none focus:outline-none focus:border-teal-500/50 transition-colors max-h-56 min-h-[42px] leading-relaxed ${prompt.includes("\n") || /\b(def|function|class|import|return|buckets|for|if|while|const|let|var)\b/.test(prompt)
                     ? "font-mono text-[11.5px]"
                     : "font-sans"
-                }`}
+                  }`}
               />
               <Button
                 type="submit"

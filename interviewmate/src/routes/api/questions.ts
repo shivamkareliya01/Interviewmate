@@ -1,9 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createAPIFileRoute } from "@tanstack/react-start/api";
 
-export const Route = createFileRoute("/api/questions")({
-  server: {
-    handlers: {
-      POST: async ({ request }) => {
+export const Route = createAPIFileRoute("/api/questions")({
+  POST: async ({ request }) => {
     try {
       const body = await request.json();
       const { messages } = body;
@@ -55,19 +53,17 @@ export const Route = createFileRoute("/api/questions")({
 
       const data = await response.json();
       const content = data.choices?.[0]?.message?.content;
-      
+
       if (content) {
         const jsonMatch = content.match(/\{[\s\S]*\}/);
         if (jsonMatch) return new Response(jsonMatch[0], { headers: { "Content-Type": "application/json" } });
         return new Response(content.trim(), { headers: { "Content-Type": "application/json" } });
       }
-      
+
       return new Response(JSON.stringify({ error: "Empty response from Groq" }), { status: 500, headers: { "Content-Type": "application/json" } });
     } catch (err) {
       console.error("[Groq Server API Error]:", err);
       return new Response(JSON.stringify({ error: "Internal Server Error" }), { status: 500, headers: { "Content-Type": "application/json" } });
     }
-      },
-    },
   },
 });

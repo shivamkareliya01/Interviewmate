@@ -1418,11 +1418,7 @@ ${userSolution}`;
 
     console.log("[Grok Evaluation Raw Response]:", rawJson);
 
-    const parsed = JSON.parse(rawJson);
-
-    if (!parsed || typeof parsed.overallScore !== "number") {
-      throw new Error("Invalid evaluation result format");
-    }
+    const parsed: CodeEvaluationResult = JSON.parse(rawJson);
 
     // Fix 3: Post-validation guard to override erroneous high scores on failed attempts
     if (!isValidAttempt || parsed.overallScore > 100) {
@@ -1441,7 +1437,7 @@ ${userSolution}`;
       };
     }
 
-    return parsed as CodeEvaluationResult;
+    return parsed;
   } catch (err) {
     console.warn("Grok evaluation API unconfigured or failed, using strict local accuracy validator:", err);
 
