@@ -1,0 +1,7 @@
+name = "interviewmate"
+main = ".output/server/index.mjs"
+compatibility_date = "2024-03-01"
+compatibility_flags = ["nodejs_compat"]
+
+[assets]
+directory = ".output/public"
