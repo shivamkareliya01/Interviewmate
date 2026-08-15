@@ -14,7 +14,7 @@ function getEnvVar(key: string): string {
 }
 
 const secret = getEnvVar("BETTER_AUTH_SECRET") || "interviewmate_secret_key_32bytes_minimum_length_required";
-const baseURL = getEnvVar("BETTER_AUTH_URL") || "http://localhost:8080";
+const baseURL = getEnvVar("BETTER_AUTH_URL") || "https://interviewmate.shivamkareliya51.workers.dev";
 const clientId = getEnvVar("GOOGLE_CLIENT_ID").trim();
 const clientSecret = getEnvVar("GOOGLE_CLIENT_SECRET").trim();
 
