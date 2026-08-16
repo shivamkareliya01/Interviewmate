@@ -50,7 +50,8 @@ export default {
     try {
       const url = new URL(request.url);
       if (url.pathname.startsWith("/api/auth")) {
-        return await auth.handler(request);
+        const timeoutPromise = new Promise<Response>((_, reject) => setTimeout(() => reject(new Error("Auth handler timed out")), 5000));
+        return await Promise.race([auth.handler(request), timeoutPromise]);
       }
       
       if (request.method === "POST") {
