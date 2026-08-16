@@ -254,6 +254,8 @@ function DashboardPage() {
       toast.error(`Compile Error on line ${result.compileError?.line || 1}! Check details in Test Result.`);
     } else if (result.status === "runtime_error") {
       toast.error("Runtime Error during code execution.");
+    } else if (result.status === "system_error") {
+      toast.error("Code execution service unavailable. Please try again in a moment.");
     } else {
       toast.success(`Execution complete! Passed ${result.passCount}/${result.totalCount} sample test cases.`);
     }

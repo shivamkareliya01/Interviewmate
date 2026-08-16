@@ -71,15 +71,12 @@ try {
 
 export const auth = {
   handler: async (req: Request) => {
-    console.log("-> auth.handler called", req.url, req.method);
     try {
-      const res = await authInstance.handler(req);
-      console.log("<- auth.handler returned", res.status);
-      return res;
+      return await authInstance.handler(req);
     } catch (e: any) {
       // Handle stale/corrupted cookies causing Base64 decode errors
       if (e?.message?.includes("Invalid Base64 character")) {
-        console.warn("[Better Auth] Stale cookies detected, clearing them. Error:", e.message);
+        // Stale/corrupted cookies — silently clear them
         const url = new URL(req.url);
         const cookieDomain = url.hostname;
         const clearCookies = [
@@ -102,7 +99,7 @@ export const auth = {
           }
         );
       }
-      console.error("<- auth.handler threw", e.name, e.message);
+      console.error("[Better Auth] Unhandled error:", e.message);
       throw e;
     }
   },
