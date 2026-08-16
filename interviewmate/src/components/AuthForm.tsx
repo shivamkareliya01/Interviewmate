@@ -46,18 +46,24 @@ export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
     }
   };
 
-  const handleGoogle = async () => {
+  const handleGoogle = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    console.log("[AuthForm] handleGoogle clicked");
     setLoading(true);
     try {
+      console.log("[AuthForm] Calling authClient.signIn.social...");
       const res = await authClient.signIn.social({
         provider: "google",
         callbackURL: "/user/dashboard",
       });
+      console.log("[AuthForm] authClient.signIn.social response:", res);
       if (res.error) throw new Error(res.error.message || "Google sign-in failed. Please try again.");
     } catch (err) {
+      console.error("[AuthForm] handleGoogle error:", err);
       toast.error(err instanceof Error ? err.message : "Google sign-in failed. Please try again.");
     } finally {
       setLoading(false);
+      console.log("[AuthForm] handleGoogle finished");
     }
   };
 

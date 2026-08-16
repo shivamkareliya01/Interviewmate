@@ -14,7 +14,8 @@ function getEnvVar(key: string): string {
 }
 
 const secret = getEnvVar("BETTER_AUTH_SECRET") || "interviewmate_secret_key_32bytes_minimum_length_required";
-const baseURL = getEnvVar("BETTER_AUTH_URL") || "https://interviewmate.shivamkareliya51.workers.dev";
+const envUrl = getEnvVar("BETTER_AUTH_URL");
+const baseURL = envUrl ? envUrl : (typeof process !== "undefined" && process.env.NODE_ENV === "development" ? "http://localhost:8080" : "https://interviewmate.shivamkareliya51.workers.dev");
 const clientId = getEnvVar("GOOGLE_CLIENT_ID").trim();
 const clientSecret = getEnvVar("GOOGLE_CLIENT_SECRET").trim();
 
@@ -27,7 +28,7 @@ if (!clientId || !clientSecret) {
 const memoryDb: Record<string, any[]> = {};
 const memoryAdapter = {
   id: "memory-adapter",
-  createModel: async ({ model, data }: any) => {
+  create: async ({ model, data }: any) => {
     if (!memoryDb[model]) memoryDb[model] = [];
     const id = data.id || Math.random().toString(36).slice(2);
     const record = { ...data, id };
@@ -53,6 +54,20 @@ const memoryAdapter = {
       return true;
     });
   },
+  update: async ({ model, where, update }: any) => {
+    if (!memoryDb[model]) return null;
+    const record = memoryDb[model].find((record: any) => {
+      for (const condition of where) {
+        if (record[condition.field] !== condition.value) return false;
+      }
+      return true;
+    });
+    if (record) {
+      Object.assign(record, update);
+      return record;
+    }
+    return null;
+  },
   updateMany: async ({ model, where, update }: any) => {
     if (!memoryDb[model]) return 0;
     let count = 0;
@@ -67,6 +82,18 @@ const memoryAdapter = {
       }
     }
     return count;
+  },
+  delete: async ({ model, where }: any) => {
+    if (!memoryDb[model]) return;
+    const index = memoryDb[model].findIndex((record: any) => {
+      for (const condition of where) {
+        if (record[condition.field] !== condition.value) return false;
+      }
+      return true;
+    });
+    if (index !== -1) {
+      memoryDb[model].splice(index, 1);
+    }
   },
   deleteMany: async ({ model, where }: any) => {
     if (!memoryDb[model]) return 0;

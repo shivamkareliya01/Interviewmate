@@ -49,11 +49,18 @@ export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const url = new URL(request.url);
+
+      
       if (url.pathname.startsWith("/api/auth")) {
         const timeoutPromise = new Promise<Response>((_, reject) => setTimeout(() => reject(new Error("Auth handler timed out")), 5000));
-        return await Promise.race([auth.handler(request), timeoutPromise]);
+        const res = await Promise.race([auth.handler(request), timeoutPromise]);
+        if (res) return res;
+        return new Response(JSON.stringify({ error: "Auth route not found or not handled by Better Auth" }), {
+          status: 404,
+          headers: { "content-type": "application/json" }
+        });
       }
-      
+
       if (request.method === "POST") {
         if (url.pathname === "/api/questions") {
           const { handleApiQuestions } = await import("./server/api-handlers");
@@ -68,6 +75,7 @@ export default {
           return await handleApiChat(request);
         }
       }
+      
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);

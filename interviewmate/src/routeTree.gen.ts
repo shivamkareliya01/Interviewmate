@@ -13,9 +13,6 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as SignUpRouteImport } from './routes/sign-up'
-import { Route as ApiCallRouteImport } from './routes/api/call'
-import { Route as ApiChatRouteImport } from './routes/api/chat'
-import { Route as ApiQuestionsRouteImport } from './routes/api/questions'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as AuthenticatedUserAnalyticsRouteImport } from './routes/_authenticated/user/analytics'
 import { Route as AuthenticatedUserBookmarksRouteImport } from './routes/_authenticated/user/bookmarks'
@@ -26,7 +23,6 @@ import { Route as AuthenticatedUserMockinterviewRouteImport } from './routes/_au
 import { Route as AuthenticatedUserPracticeRouteImport } from './routes/_authenticated/user/practice'
 import { Route as AuthenticatedUserResumeRouteImport } from './routes/_authenticated/user/resume'
 import { Route as AuthenticatedUserSettingsRouteImport } from './routes/_authenticated/user/settings'
-import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AuthenticatedUserCompaniesCompanyIdRouteImport } from './routes/_authenticated/user/companies.$companyId'
 import { Route as AuthenticatedUserSessionSessionIdRouteImport } from './routes/_authenticated/user/session/$sessionId'
 
@@ -47,21 +43,6 @@ const SignInRoute = SignInRouteImport.update({
 const SignUpRoute = SignUpRouteImport.update({
   id: '/sign-up',
   path: '/sign-up',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiCallRoute = ApiCallRouteImport.update({
-  id: '/api/call',
-  path: '/api/call',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiChatRoute = ApiChatRouteImport.update({
-  id: '/api/chat',
-  path: '/api/chat',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiQuestionsRoute = ApiQuestionsRouteImport.update({
-  id: '/api/questions',
-  path: '/api/questions',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthCallbackRoute = AuthCallbackRouteImport.update({
@@ -122,11 +103,6 @@ const AuthenticatedUserSettingsRoute =
     path: '/user/settings',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
-  id: '/api/auth/$',
-  path: '/api/auth/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthenticatedUserCompaniesCompanyIdRoute =
   AuthenticatedUserCompaniesCompanyIdRouteImport.update({
     id: '/$companyId',
@@ -144,9 +120,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
-  '/api/call': typeof ApiCallRoute
-  '/api/chat': typeof ApiChatRoute
-  '/api/questions': typeof ApiQuestionsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/user/analytics': typeof AuthenticatedUserAnalyticsRoute
   '/user/bookmarks': typeof AuthenticatedUserBookmarksRoute
@@ -157,7 +130,6 @@ export interface FileRoutesByFullPath {
   '/user/practice': typeof AuthenticatedUserPracticeRoute
   '/user/resume': typeof AuthenticatedUserResumeRoute
   '/user/settings': typeof AuthenticatedUserSettingsRoute
-  '/api/auth/$': typeof ApiAuthSplatRoute
   '/user/companies/$companyId': typeof AuthenticatedUserCompaniesCompanyIdRoute
   '/user/session/$sessionId': typeof AuthenticatedUserSessionSessionIdRoute
 }
@@ -165,9 +137,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
-  '/api/call': typeof ApiCallRoute
-  '/api/chat': typeof ApiChatRoute
-  '/api/questions': typeof ApiQuestionsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/user/analytics': typeof AuthenticatedUserAnalyticsRoute
   '/user/bookmarks': typeof AuthenticatedUserBookmarksRoute
@@ -178,7 +147,6 @@ export interface FileRoutesByTo {
   '/user/practice': typeof AuthenticatedUserPracticeRoute
   '/user/resume': typeof AuthenticatedUserResumeRoute
   '/user/settings': typeof AuthenticatedUserSettingsRoute
-  '/api/auth/$': typeof ApiAuthSplatRoute
   '/user/companies/$companyId': typeof AuthenticatedUserCompaniesCompanyIdRoute
   '/user/session/$sessionId': typeof AuthenticatedUserSessionSessionIdRoute
 }
@@ -188,9 +156,6 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
-  '/api/call': typeof ApiCallRoute
-  '/api/chat': typeof ApiChatRoute
-  '/api/questions': typeof ApiQuestionsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/_authenticated/user/analytics': typeof AuthenticatedUserAnalyticsRoute
   '/_authenticated/user/bookmarks': typeof AuthenticatedUserBookmarksRoute
@@ -201,7 +166,6 @@ export interface FileRoutesById {
   '/_authenticated/user/practice': typeof AuthenticatedUserPracticeRoute
   '/_authenticated/user/resume': typeof AuthenticatedUserResumeRoute
   '/_authenticated/user/settings': typeof AuthenticatedUserSettingsRoute
-  '/api/auth/$': typeof ApiAuthSplatRoute
   '/_authenticated/user/companies/$companyId': typeof AuthenticatedUserCompaniesCompanyIdRoute
   '/_authenticated/user/session/$sessionId': typeof AuthenticatedUserSessionSessionIdRoute
 }
@@ -211,9 +175,6 @@ export interface FileRouteTypes {
     | '/'
     | '/sign-in'
     | '/sign-up'
-    | '/api/call'
-    | '/api/chat'
-    | '/api/questions'
     | '/auth/callback'
     | '/user/analytics'
     | '/user/bookmarks'
@@ -224,7 +185,6 @@ export interface FileRouteTypes {
     | '/user/practice'
     | '/user/resume'
     | '/user/settings'
-    | '/api/auth/$'
     | '/user/companies/$companyId'
     | '/user/session/$sessionId'
   fileRoutesByTo: FileRoutesByTo
@@ -232,9 +192,6 @@ export interface FileRouteTypes {
     | '/'
     | '/sign-in'
     | '/sign-up'
-    | '/api/call'
-    | '/api/chat'
-    | '/api/questions'
     | '/auth/callback'
     | '/user/analytics'
     | '/user/bookmarks'
@@ -245,7 +202,6 @@ export interface FileRouteTypes {
     | '/user/practice'
     | '/user/resume'
     | '/user/settings'
-    | '/api/auth/$'
     | '/user/companies/$companyId'
     | '/user/session/$sessionId'
   id:
@@ -254,9 +210,6 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/sign-in'
     | '/sign-up'
-    | '/api/call'
-    | '/api/chat'
-    | '/api/questions'
     | '/auth/callback'
     | '/_authenticated/user/analytics'
     | '/_authenticated/user/bookmarks'
@@ -267,7 +220,6 @@ export interface FileRouteTypes {
     | '/_authenticated/user/practice'
     | '/_authenticated/user/resume'
     | '/_authenticated/user/settings'
-    | '/api/auth/$'
     | '/_authenticated/user/companies/$companyId'
     | '/_authenticated/user/session/$sessionId'
   fileRoutesById: FileRoutesById
@@ -277,11 +229,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
-  ApiCallRoute: typeof ApiCallRoute
-  ApiChatRoute: typeof ApiChatRoute
-  ApiQuestionsRoute: typeof ApiQuestionsRoute
   AuthCallbackRoute: typeof AuthCallbackRoute
-  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -312,27 +260,6 @@ declare module '@tanstack/react-router' {
       path: '/sign-up'
       fullPath: '/sign-up'
       preLoaderRoute: typeof SignUpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/call': {
-      id: '/api/call'
-      path: '/api/call'
-      fullPath: '/api/call'
-      preLoaderRoute: typeof ApiCallRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/chat': {
-      id: '/api/chat'
-      path: '/api/chat'
-      fullPath: '/api/chat'
-      preLoaderRoute: typeof ApiChatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/questions': {
-      id: '/api/questions'
-      path: '/api/questions'
-      fullPath: '/api/questions'
-      preLoaderRoute: typeof ApiQuestionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/callback': {
@@ -405,13 +332,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUserSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/api/auth/$': {
-      id: '/api/auth/$'
-      path: '/api/auth/$'
-      fullPath: '/api/auth/$'
-      preLoaderRoute: typeof ApiAuthSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_authenticated/user/companies/$companyId': {
       id: '/_authenticated/user/companies/$companyId'
       path: '/$companyId'
@@ -479,11 +399,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
-  ApiCallRoute: ApiCallRoute,
-  ApiChatRoute: ApiChatRoute,
-  ApiQuestionsRoute: ApiQuestionsRoute,
   AuthCallbackRoute: AuthCallbackRoute,
-  ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -1,5 +1,2 @@
-import { createFileRoute } from "@tanstack/react-router";
-
-export const Route = createFileRoute("/api/questions")({
-  component: () => null,
-});
+// Handled by server.ts
+export {};
