@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, type ReactNode } from "react";
+import { createContext, useContext, useMemo, useState, useEffect, type ReactNode } from "react";
 import { authClient, useSession } from "@/lib/auth-client";
 
 export type Profile = {
@@ -29,7 +29,20 @@ type AuthContextValue = {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const { data: sessionData, isPending } = useSession();
+  const [sessionData, setSessionData] = useState<any>(null);
+  const [isPending, setIsPending] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    setIsPending(true);
+    authClient.getSession().then(({ data, error }) => {
+      if (mounted) {
+        setSessionData(data);
+        setIsPending(false);
+      }
+    });
+    return () => { mounted = false; };
+  }, []);
 
   const user = sessionData?.user ?? null;
   const session = sessionData?.session ?? null;

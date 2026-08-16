@@ -25,94 +25,19 @@ if (!clientId || !clientSecret) {
   console.log(`[Better Auth] Configured Google Auth for Client ID: ${clientId.slice(0, 20)}...`);
 }
 
-const memoryDb: Record<string, any[]> = {};
-const memoryAdapter = {
-  id: "memory-adapter",
-  create: async ({ model, data }: any) => {
-    if (!memoryDb[model]) memoryDb[model] = [];
-    const id = data.id || Math.random().toString(36).slice(2);
-    const record = { ...data, id };
-    memoryDb[model].push(record);
-    return record;
-  },
-  findOne: async ({ model, where }: any) => {
-    if (!memoryDb[model]) return null;
-    return memoryDb[model].find((record: any) => {
-      for (const condition of where) {
-        if (record[condition.field] !== condition.value) return false;
-      }
-      return true;
-    }) || null;
-  },
-  findMany: async ({ model, where }: any) => {
-    if (!memoryDb[model]) return [];
-    if (!where || where.length === 0) return memoryDb[model];
-    return memoryDb[model].filter((record: any) => {
-      for (const condition of where) {
-        if (record[condition.field] !== condition.value) return false;
-      }
-      return true;
-    });
-  },
-  update: async ({ model, where, update }: any) => {
-    if (!memoryDb[model]) return null;
-    const record = memoryDb[model].find((record: any) => {
-      for (const condition of where) {
-        if (record[condition.field] !== condition.value) return false;
-      }
-      return true;
-    });
-    if (record) {
-      Object.assign(record, update);
-      return record;
-    }
-    return null;
-  },
-  updateMany: async ({ model, where, update }: any) => {
-    if (!memoryDb[model]) return 0;
-    let count = 0;
-    for (const record of memoryDb[model]) {
-      let match = true;
-      for (const condition of where) {
-        if (record[condition.field] !== condition.value) match = false;
-      }
-      if (match) {
-        Object.assign(record, update);
-        count++;
-      }
-    }
-    return count;
-  },
-  delete: async ({ model, where }: any) => {
-    if (!memoryDb[model]) return;
-    const index = memoryDb[model].findIndex((record: any) => {
-      for (const condition of where) {
-        if (record[condition.field] !== condition.value) return false;
-      }
-      return true;
-    });
-    if (index !== -1) {
-      memoryDb[model].splice(index, 1);
-    }
-  },
-  deleteMany: async ({ model, where }: any) => {
-    if (!memoryDb[model]) return 0;
-    const initialLength = memoryDb[model].length;
-    memoryDb[model] = memoryDb[model].filter((record: any) => {
-      let match = true;
-      for (const condition of where) {
-        if (record[condition.field] !== condition.value) match = false;
-      }
-      return !match;
-    });
-    return initialLength - memoryDb[model].length;
-  }
-};
+import { LibsqlDialect } from "@libsql/kysely-libsql";
+import { createClient } from "@libsql/client";
 
 let authInstance: ReturnType<typeof betterAuth>;
 try {
+  const dialect = new LibsqlDialect({
+    client: createClient({
+      url: "file:sqlite.db"
+    })
+  });
+  
   authInstance = betterAuth({
-    database: memoryAdapter as any,
+    database: dialect,
     secret,
     baseURL,
     emailAndPassword: {
@@ -147,12 +72,15 @@ try {
 export const auth = {
   handler: async (req: Request) => {
     console.log("-> auth.handler called", req.url, req.method);
+    console.log("COOKIE HEADER:", req.headers.get("cookie"));
     try {
       const res = await authInstance.handler(req);
       console.log("<- auth.handler returned", res.status);
       return res;
     } catch (e) {
-      console.error("<- auth.handler threw", e);
+      console.error("<- auth.handler threw", e.name, e.message);
+      console.error("STACK:", e.stack);
+      console.error("DETAILS:", JSON.stringify(e, Object.getOwnPropertyNames(e), 2));
       throw e;
     }
   },
