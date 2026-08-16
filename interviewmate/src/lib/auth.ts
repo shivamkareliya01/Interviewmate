@@ -69,6 +69,10 @@ try {
   } as any;
 }
 
+// Export the raw betterAuth instance for use with toNodeHandler() in Vite dev middleware.
+// toNodeHandler() from better-auth/node needs the raw instance, not our wrapper.
+export { authInstance };
+
 export const auth = {
   handler: async (req: Request) => {
     try {

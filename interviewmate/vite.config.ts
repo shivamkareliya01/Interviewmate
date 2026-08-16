@@ -22,9 +22,9 @@ export default async (env: any) => {
                 try {
                   // 1. Better Auth (uses its own Node adapter)
                   if (req.url.startsWith('/api/auth/')) {
-                    const { auth } = await server.ssrLoadModule('/src/lib/auth.ts');
+                    const { authInstance } = await server.ssrLoadModule('/src/lib/auth.ts');
                     const { toNodeHandler } = await server.ssrLoadModule('better-auth/node');
-                    return toNodeHandler(auth)(req, res);
+                    return toNodeHandler(authInstance)(req, res);
                   }
 
                   // 2. Custom APIs (convert Node request to Web request)
