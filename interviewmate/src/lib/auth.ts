@@ -72,15 +72,37 @@ try {
 export const auth = {
   handler: async (req: Request) => {
     console.log("-> auth.handler called", req.url, req.method);
-    console.log("COOKIE HEADER:", req.headers.get("cookie"));
     try {
       const res = await authInstance.handler(req);
       console.log("<- auth.handler returned", res.status);
       return res;
-    } catch (e) {
+    } catch (e: any) {
+      // Handle stale/corrupted cookies causing Base64 decode errors
+      if (e?.message?.includes("Invalid Base64 character")) {
+        console.warn("[Better Auth] Stale cookies detected, clearing them. Error:", e.message);
+        const url = new URL(req.url);
+        const cookieDomain = url.hostname;
+        const clearCookies = [
+          "better-auth.session_token",
+          "better-auth.session_data",
+          "better-auth.account_data",
+          "better-auth.state",
+        ];
+        const setCookieHeaders = clearCookies.map(
+          (name) => `${name}=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax`
+        );
+        return new Response(
+          JSON.stringify({ session: null, user: null }),
+          {
+            status: 200,
+            headers: [
+              ["Content-Type", "application/json"],
+              ...setCookieHeaders.map((v) => ["Set-Cookie", v] as [string, string]),
+            ],
+          }
+        );
+      }
       console.error("<- auth.handler threw", e.name, e.message);
-      console.error("STACK:", e.stack);
-      console.error("DETAILS:", JSON.stringify(e, Object.getOwnPropertyNames(e), 2));
       throw e;
     }
   },
