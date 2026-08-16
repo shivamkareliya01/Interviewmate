@@ -1,139 +1,284 @@
-# Interview Mate
-
-
-Build a full-stack web app called InterviewMate — an AI-powered technical interview practice platform. Use React + Vite + TypeScript + Tailwind + shadcn/ui for the frontend, and Supabase for auth, database, and backend logic (Postgres + Row Level Security + Edge Functions).
-
-Core concept
-
-Users pick a tech domain (e.g. React, Node.js, Python, SQL) and a difficulty level (Beginner / Intermediate / Advanced). The app generates 5 AI interview questions for that combo, the user answers each one, and the AI scores every answer plus gives an overall performance summary at the end. There's also a self-paced "Practice Mode" question bank, a leaderboard, bookmarks, and an admin panel.
-
-Auth & roles
-
-Use Supabase Auth (email/password + optionally Google OAuth) for sign up / sign in.
-
-Two roles: user and admin, stored in a profiles table with a role column (default user).
-
-On signup, auto-create a row in profiles linked to the auth user (id, email, username, first_name, last_name, avatar_url, role, status, total_points, practice_sessions_completed, mock_interviews_completed, bookmarked_questions).
-
-Route protection: unauthenticated users can only see the landing page and auth pages. Logged-in admins are redirected to /admin/dashboard. Non-admins are blocked from any /admin/* route.
-
-Database tables (Postgres via Supabase)
-
-profiles — as described above, one row per user, RLS so users can only read/update their own row (admins can read/update all).
-
-domains — id, name (unique), questions_count, active_users, status (active/inactive), created_at, updated_at.
-
-questions — practice question bank: id, title, description, answer, hints (text array), domain, difficulty (Beginner/Intermediate/Advanced), created_at.
-
-practice_sessions — self-paced sessions: id, user_id, domain, difficulty, total_questions, completed_questions, current_question_index, status (in-progress/completed/abandoned), question_ids (array), created_at, updated_at.
-
-mock_sessions — AI mock interview sessions: id, session_id (unique text), user_id, domain, difficulty, questions (jsonb array of {id, title, domain, difficulty, description, time_limit, reference_answer}), answers (jsonb array of {question_id, answer, rating, feedback, time_spent}), overall_rating, total_time_spent, overall_feedback, strengths (text array), improvements (text array), recommendations (text array), completed_at, created_at, updated_at.
-
-Add RLS policies so users can only see/modify their own sessions; admins can see all.
-
-AI integration (Edge Functions)
-
-Create Supabase Edge Functions that call an LLM (use the Lovable AI Gateway / OpenAI-compatible endpoint — I'll provide the API key as a secret) to:
-
-generate-mock-questions — input: domain, difficulty. Prompt the model to act as an expert technical interviewer and return strict JSON only:
-
-{ "questions": [
-  { "id": number, "title": "string", "description": "string", "referenceAnswer": "string", "timeLimit": number }
-]}
-
-
-Rules for the system prompt: generate exactly 5 questions matching the difficulty; if the domain isn't a valid tech interview topic, return a reason instead of questions; reference answers should be brief and clear; timeLimit in minutes (3–8 depending on difficulty); no text outside the JSON object.
-
-score-answer (optional, called per question or all at once) — input: question + user's answer. Returns a rating (1–10) and short feedback per answer.
-
-generate-session-feedback — input: domain, difficulty, and the full list of question/answer/rating pairs. Returns strict JSON:
-
-{ "overallFeedback": "string (3-4 sentences)", "strengths": ["string"], "improvements": ["string"], "recommendations": ["string"] }
-
-
-Tone: encouraging but honest, with actionable next steps.
-
-After scoring, update the user's total_points, mock_interviews_completed in profiles, and recalculate that domain's questions_count in domains.
-
-Pages / routes
-
-Public
-
-/ — Landing page: hero section explaining the product, call-to-action to sign up, feature highlights (AI-generated questions, instant feedback, leaderboard).
-
-/sign-in, /sign-up — Supabase auth forms.
-
-User area (/user/*)
-
-/user/dashboard — overview: points, sessions completed, recent activity, quick links.
-
-/user/practice — browse/filter the question bank by domain & difficulty, answer questions, reveal reference answer, bookmark toggle.
-
-/user/mockinterview — start a new mock interview: select domain + difficulty → generate questions → step through each question with a timer (based on timeLimit) → submit answer → see AI rating/feedback per question → after all questions, show the AI-generated overall summary (strengths, improvements, recommendations) and points earned.
-
-/user/leaderboard — ranked list of users by total_points, with mock interviews/practice sessions completed.
-
-/user/bookmarks — saved questions.
-
-Admin area (/admin/*, admin-only)
-
-/admin/dashboard — aggregate stats: total users, total sessions, most popular domains, average ratings (charts).
-
-/admin/manageuser — table of all users, view/edit role & status, delete.
-
-/admin/domains — CRUD for domains, view question counts.
-
-/admin/leaderboard — full leaderboard view with admin controls.
-
-UI/UX direction
-
-Clean, modern SaaS look — dark-mode-friendly, generous whitespace, a primary accent color (e.g. indigo or teal) for CTAs and progress indicators.
-
-Use shadcn/ui components: Card, Button, Dialog, Dropdown, Select, Switch, Table, Progress, Badge, Avatar, Toast for notifications.
-
-Mock interview screen should feel focused: one question at a time, visible countdown timer, clear "Submit Answer" action, then a feedback reveal animation before moving to the next question.
-
-Dashboard should use simple charts (bar/line) for progress over time and domain breakdown.
-
-Fully responsive (mobile-friendly), since users may practice on the go.
-
-Build order (do this incrementally)
-
-Set up Supabase project, auth, and all tables/RLS policies above.
-
-Build landing page + auth flow + profile auto-creation.
-
-Build user dashboard shell and navigation (user vs admin nav).
-
-Build Practice Mode (question bank browsing, bookmarking).
-
-Build Mock Interview flow end-to-end, including the two AI edge functions (question generation, scoring/feedback).
-
-Build leaderboard.
-
-Build admin panel (user management, domain management, dashboard analytics).
-
-Polish UI, add loading/error states, empty states, and toasts.
-
-Start with step 1 and 2, then pause for my review before continuing.
-
-This project was built with [Lovable](https://lovable.dev).
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/03598fa0-819b-4f05-b4df-f0c3a0776b80).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
-
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
+# 🎯 InterviewMate
+
+**AI-Powered Technical Interview Practice Platform**
+
+InterviewMate is a full-stack web application that helps developers and engineers prepare for technical interviews with AI-generated questions, real-time code execution, instant scoring, and personalized feedback.
+
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-8.2-646CFF?logo=vite&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-4.2-06B6D4?logo=tailwindcss&logoColor=white)
+![Cloudflare Workers](https://img.shields.io/badge/Cloudflare_Workers-F38020?logo=cloudflare&logoColor=white)
+
+---
+
+## ✨ Features
+
+### 🧠 AI Mock Interviews
+- Select a tech domain (React, Node.js, Python, SQL, DSA, System Design, and more) and difficulty level
+- AI generates 10 calibrated interview questions per session (8 MCQs + 2 coding/theory)
+- Step through questions with countdown timers
+- Receive AI-powered scoring and detailed feedback per answer
+- Get an overall performance summary with strengths, improvements, and recommendations
+
+### 💻 Interactive Code Editor
+- Built-in Monaco Editor (VS Code engine) with syntax highlighting
+- Support for Python, JavaScript, TypeScript, C++, Java, Go, and C
+- **Real code execution** via [Judge0 CE](https://judge0.com/) — your code actually runs against test cases
+- LeetCode-style test case panel with expected vs actual output comparison
+- Auto-save drafts per challenge and language
+
+### 📝 Practice Mode
+- Browse a curated question bank filtered by domain and difficulty
+- 10+ coding challenges (Two Sum, LRU Cache, Top K Frequent Elements, etc.)
+- Bookmark questions for later review
+- AI Tutor chat for hints and explanations
+
+### 📄 Resume-Based Interview Prep
+- Upload your resume (PDF) for AI-parsed skill extraction
+- Generate interview questions personalized to your skills, experience level, and target role
+- Seniority-calibrated difficulty (Junior → fundamentals, Senior → architecture trade-offs)
+
+### 🏢 Company-Specific Prep
+- Browse interview patterns for 50+ companies (Google, Amazon, Meta, etc.)
+- Company-tagged questions with difficulty breakdowns
+- Acceptance rate and question frequency data
+
+### 🏆 Leaderboard & Gamification
+- Global leaderboard ranked by total points
+- Practice streaks and session tracking
+- Points earned from mock interviews and practice sessions
+
+### 🔐 Authentication
+- Google OAuth sign-in via [Better Auth](https://www.better-auth.com/)
+- Session management with secure cookie handling
+- Role-based access control (User / Admin)
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| **Frontend** | React 19, TypeScript, TailwindCSS 4, shadcn/ui, Radix UI |
+| **Routing** | TanStack Router + TanStack Start (SSR) |
+| **Code Editor** | Monaco Editor (@monaco-editor/react) |
+| **AI Engine** | Groq API (Llama 3.1 8B) with Pollinations fallback |
+| **Code Execution** | Judge0 CE (free, sandboxed remote execution) |
+| **Auth** | Better Auth v1.1 with Google OAuth |
+| **Database** | SQLite via LibSQL + Kysely ORM |
+| **Build Tool** | Vite 8.2 + Nitro (server runtime) |
+| **Deployment** | Cloudflare Workers |
+| **Package Manager** | Bun |
+
+---
+
+## 📁 Project Structure
+
+```
+interviewmate/
+├── src/
+│   ├── assets/              # Static images and assets
+│   ├── components/          # Reusable UI components (shadcn/ui based)
+│   │   ├── ui/              # Base UI primitives (Button, Card, Dialog, etc.)
+│   │   ├── AuthForm.tsx     # Google OAuth sign-in form
+│   │   ├── TestRunnerPanel.tsx  # Code execution results panel
+│   │   └── ...
+│   ├── hooks/               # Custom React hooks
+│   │   └── useAuth.tsx      # Authentication state hook
+│   ├── lib/                 # Core business logic
+│   │   ├── auth.ts          # Better Auth server configuration
+│   │   ├── auth-client.ts   # Better Auth client
+│   │   ├── challenges.ts    # Coding challenge definitions & test cases
+│   │   ├── grok.ts          # AI question generation & chat streaming
+│   │   ├── piston.ts        # Code execution engine (Judge0 CE integration)
+│   │   ├── questionBank.ts  # Practice question repository
+│   │   ├── resumeStore.ts   # Resume parsing & storage
+│   │   └── ...
+│   ├── routes/              # TanStack Router file-based routes
+│   │   ├── index.tsx        # Landing page
+│   │   ├── sign-in.tsx      # Sign in page
+│   │   ├── sign-up.tsx      # Sign up page
+│   │   ├── api/             # API route handlers
+│   │   │   ├── auth/$.ts    # Auth API catch-all
+│   │   │   ├── chat.ts      # AI chat streaming endpoint
+│   │   │   ├── call.ts      # AI API proxy endpoint
+│   │   │   └── questions.ts # Question generation endpoint
+│   │   └── _authenticated/user/
+│   │       ├── dashboard.tsx    # Main coding workspace + AI chat
+│   │       ├── practice.tsx     # Question bank browser
+│   │       ├── mockinterview.tsx # Mock interview flow
+│   │       ├── resume.tsx       # Resume upload & analysis
+│   │       ├── companies.tsx    # Company-specific prep
+│   │       ├── bookmarks.tsx    # Saved questions
+│   │       └── ...
+│   ├── server/              # Server-side API handlers
+│   │   └── api-handlers.ts  # Groq API proxy implementations
+│   └── styles.css           # Global styles
+├── public/                  # Static public assets
+├── wrangler.toml            # Cloudflare Workers configuration
+├── vite.config.ts           # Vite + TanStack Start + Nitro config
+├── tsconfig.json            # TypeScript configuration
+├── tsr.config.json          # TanStack Router config
+└── package.json
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) v18+ or [Bun](https://bun.sh/) v1.1+
+- A [Groq API Key](https://console.groq.com/) (free tier available)
+- A [Google OAuth Client](https://console.cloud.google.com/apis/credentials) for sign-in
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/your-username/interviewmate.git
+cd interviewmate
+
+# Install dependencies
+bun install
+# or
+npm install
+```
+
+### Environment Variables
+
+Create a `.env` file in the project root:
+
+```env
+# Authentication
+BETTER_AUTH_SECRET="your_secret_key_minimum_32_bytes"
+VITE_BETTER_AUTH_SECRET="your_secret_key_minimum_32_bytes"
+BETTER_AUTH_URL="http://localhost:8080"
+VITE_BETTER_AUTH_URL="http://localhost:8080"
+
+# Google OAuth
+GOOGLE_CLIENT_ID="your_google_client_id"
+GOOGLE_CLIENT_SECRET="your_google_client_secret"
+VITE_GOOGLE_CLIENT_ID="your_google_client_id"
+
+# Groq AI API
+GROQ_API_KEY="your_groq_api_key"
+VITE_GROQ_API_KEY="your_groq_api_key"
+VITE_GROQ_API_URL="https://api.groq.com/openai/v1"
+VITE_GROQ_MODEL="llama-3.1-8b-instant"
+```
+
+### Development
+
+```bash
+# Start the development server
+bun run dev
+# or
 npm run dev
 ```
+
+Open [http://localhost:8080](http://localhost:8080) in your browser.
+
+### Production Build
+
+```bash
+# Build for production
+bun run build
+# or
+npm run build
+
+# Preview the production build
+npx vite preview
+```
+
+---
+
+## ☁️ Deployment (Cloudflare Workers)
+
+The project deploys to Cloudflare Workers via Wrangler:
+
+```bash
+# Login to Cloudflare
+npx wrangler login
+
+# Build and deploy
+npm run build
+npx wrangler deploy
+```
+
+For CI/CD (Cloudflare dashboard), set the **Build command** to:
+```
+npm install && npm run build && npx wrangler deploy
+```
+
+And the **Root directory** to `interviewmate` if the project is in a subdirectory.
+
+---
+
+## 🧪 Code Execution Architecture
+
+InterviewMate uses **Judge0 CE** (Community Edition) for sandboxed code execution:
+
+```
+User clicks "Run" → executeCodeInSandbox()
+  → Generates language-specific test harness
+    (parses test inputs, calls user's function/class, captures output)
+  → Sends wrapped code to Judge0 CE API
+  → Parses stdout RESULT: lines
+  → Compares actual vs expected output
+  → Returns pass/fail per test case
+```
+
+**Supported problem types:**
+- **Function-based** — `def twoSum(nums, target)` → auto-parses args and calls function
+- **Class-based** — `class LRUCache` → instantiates class and calls methods in sequence
+- **Linked List** — auto-generates `ListNode` helper and list builder utilities
+
+---
+
+## 🤖 AI Integration
+
+InterviewMate uses **Groq Cloud** (Llama 3.1 8B Instant) for:
+
+| Feature | Endpoint | Description |
+|---------|----------|-------------|
+| Question Generation | `/api/questions` | Generates 10 domain-calibrated interview questions |
+| AI Chat | `/api/chat` | Streaming AI tutor for hints, code review, explanations |
+| Code Evaluation | `/api/call` | AI-powered code quality scoring and feedback |
+
+Fallback chain: Groq API → Pollinations API → Offline domain-aware question bank
+
+---
+
+## 📸 Pages Overview
+
+| Page | Route | Description |
+|------|-------|-------------|
+| Landing | `/` | Hero section, feature highlights, CTA |
+| Sign In | `/sign-in` | Google OAuth authentication |
+| Dashboard | `/user/dashboard` | Code editor, AI chat, challenge workspace |
+| Practice | `/user/practice` | Question bank with domain/difficulty filters |
+| Mock Interview | `/user/mockinterview` | Timed AI mock interview sessions |
+| Resume Prep | `/user/resume` | Upload resume for personalized questions |
+| Companies | `/user/companies` | Company-specific interview patterns |
+| Bookmarks | `/user/bookmarks` | Saved questions for review |
+| History | `/user/history` | Past session history |
+| Settings | `/user/settings` | Account preferences |
+
+---
+
+## 📄 License
+
+This project is private and not licensed for redistribution.
+
+---
+
+## 🙏 Acknowledgments
+
+- [Judge0](https://judge0.com/) — Open-source code execution system
+- [Groq](https://groq.com/) — Ultra-fast LLM inference
+- [shadcn/ui](https://ui.shadcn.com/) — Beautiful, accessible component library
+- [TanStack](https://tanstack.com/) — Type-safe routing and state management
+- [Better Auth](https://www.better-auth.com/) — Authentication framework
+- [Monaco Editor](https://microsoft.github.io/monaco-editor/) — VS Code's editor engine
