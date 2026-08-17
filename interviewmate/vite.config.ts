@@ -97,10 +97,16 @@ export default async (env: any) => {
       },
     },
     tanstackStart: {
-      server: { 
-        preset: 'cloudflare',
-        entry: "./src/server.ts" 
+      importProtection: {
+        behavior: 'error',
+        client: {
+          files: ['**/server/**'],
+          specifiers: ['server-only'],
+        },
       },
+    },
+    nitro: {
+      entry: './src/server.ts',
     },
   })(env);
 
