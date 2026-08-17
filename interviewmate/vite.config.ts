@@ -96,15 +96,6 @@ export default async (env: any) => {
         },
       },
     },
-    tanstackStart: {
-      importProtection: {
-        behavior: 'error',
-        client: {
-          files: ['**/server/**'],
-          specifiers: ['server-only'],
-        },
-      },
-    },
     nitro: {
       entry: './src/server.ts',
     },
