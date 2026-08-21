@@ -14,10 +14,26 @@ function getEnvVar(key: string): string {
 }
 
 const secret = getEnvVar("BETTER_AUTH_SECRET") || "interviewmate_secret_key_32bytes_minimum_length_required";
+const vercelProjectProductionUrl = getEnvVar("VERCEL_PROJECT_PRODUCTION_URL");
+const vercelUrlEnv = getEnvVar("VERCEL_URL");
+const vercelBranchUrl = getEnvVar("VERCEL_BRANCH_URL");
+
+const defaultProductionUrl = vercelProjectProductionUrl 
+  ? `https://${vercelProjectProductionUrl}` 
+  : (vercelUrlEnv ? `https://${vercelUrlEnv}` : "https://interviewmate.shivamkareliya11.workers.dev");
+
 const envUrl = getEnvVar("BETTER_AUTH_URL");
-const vercelUrl = getEnvVar("VERCEL_PROJECT_PRODUCTION_URL") || getEnvVar("VERCEL_URL");
-const defaultProductionUrl = vercelUrl ? `https://${vercelUrl}` : "https://interviewmate.shivamkareliya11.workers.dev";
+
 const baseURL = envUrl ? envUrl : (typeof process !== "undefined" && process.env.NODE_ENV === "development" ? "http://localhost:8080" : defaultProductionUrl);
+
+const trustedOrigins = [
+  "http://localhost:8080",
+  baseURL,
+];
+if (vercelProjectProductionUrl) trustedOrigins.push(`https://${vercelProjectProductionUrl}`);
+if (vercelUrlEnv) trustedOrigins.push(`https://${vercelUrlEnv}`);
+if (vercelBranchUrl) trustedOrigins.push(`https://${vercelBranchUrl}`);
+
 const clientId = getEnvVar("GOOGLE_CLIENT_ID").trim();
 const clientSecret = getEnvVar("GOOGLE_CLIENT_SECRET").trim();
 
@@ -43,6 +59,7 @@ try {
     database: dialect,
     secret,
     baseURL,
+    trustedOrigins,
     emailAndPassword: {
       enabled: true,
     },
