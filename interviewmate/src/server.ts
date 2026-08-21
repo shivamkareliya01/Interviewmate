@@ -2,7 +2,7 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
-import { auth } from "./lib/auth";
+import { auth, baseURL } from "./lib/auth";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -59,6 +59,15 @@ export default {
           status: 404,
           headers: { "content-type": "application/json" }
         });
+      }
+
+      if (url.pathname === "/api/debug-env") {
+        return new Response(JSON.stringify({
+          baseURL: baseURL,
+          VERCEL_PROJECT_PRODUCTION_URL: process.env.VERCEL_PROJECT_PRODUCTION_URL,
+          VERCEL_URL: process.env.VERCEL_URL,
+          BETTER_AUTH_URL: process.env.BETTER_AUTH_URL
+        }), { headers: { "content-type": "application/json" } });
       }
 
       if (request.method === "POST") {
