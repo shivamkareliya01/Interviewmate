@@ -15,7 +15,9 @@ function getEnvVar(key: string): string {
 
 const secret = getEnvVar("BETTER_AUTH_SECRET") || "interviewmate_secret_key_32bytes_minimum_length_required";
 const envUrl = getEnvVar("BETTER_AUTH_URL");
-const baseURL = envUrl ? envUrl : (typeof process !== "undefined" && process.env.NODE_ENV === "development" ? "http://localhost:8080" : "https://interviewmate.shivamkareliya11.workers.dev");
+const vercelUrl = getEnvVar("VERCEL_PROJECT_PRODUCTION_URL") || getEnvVar("VERCEL_URL");
+const defaultProductionUrl = vercelUrl ? `https://${vercelUrl}` : "https://interviewmate.shivamkareliya11.workers.dev";
+const baseURL = envUrl ? envUrl : (typeof process !== "undefined" && process.env.NODE_ENV === "development" ? "http://localhost:8080" : defaultProductionUrl);
 const clientId = getEnvVar("GOOGLE_CLIENT_ID").trim();
 const clientSecret = getEnvVar("GOOGLE_CLIENT_SECRET").trim();
 
@@ -32,7 +34,8 @@ let authInstance: ReturnType<typeof betterAuth>;
 try {
   const dialect = new LibsqlDialect({
     client: createClient({
-      url: "file:sqlite.db"
+      url: getEnvVar("DATABASE_URL") || "file:sqlite.db",
+      authToken: getEnvVar("DATABASE_AUTH_TOKEN") || undefined
     })
   });
   
