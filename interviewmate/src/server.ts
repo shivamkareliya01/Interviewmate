@@ -80,7 +80,20 @@ export default {
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
     } catch (error) {
-      console.error(error);
+      console.error("SERVER CRASH:", error);
+      
+      const isApi = request.url.includes("/api/");
+      if (isApi) {
+        return new Response(JSON.stringify({ 
+          error: "Internal Server Error", 
+          message: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined 
+        }), {
+          status: 500,
+          headers: { "content-type": "application/json" },
+        });
+      }
+
       return new Response(renderErrorPage(), {
         status: 500,
         headers: { "content-type": "text/html; charset=utf-8" },

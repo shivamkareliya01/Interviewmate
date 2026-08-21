@@ -123,7 +123,7 @@ export const auth = {
           }
         );
       }
-      console.error("[Better Auth] Unhandled error:", e.message);
+      console.error("[Better Auth] Unhandled error:", e);
       throw e;
     }
   },
