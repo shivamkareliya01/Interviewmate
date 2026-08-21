@@ -18,14 +18,16 @@ const vercelProjectProductionUrl = getEnvVar("VERCEL_PROJECT_PRODUCTION_URL");
 const vercelUrlEnv = getEnvVar("VERCEL_URL");
 const vercelBranchUrl = getEnvVar("VERCEL_BRANCH_URL");
 
-const defaultProductionUrl = vercelProjectProductionUrl 
-  ? `https://${vercelProjectProductionUrl}` 
-  : (vercelUrlEnv ? `https://${vercelUrlEnv}` : "https://interviewmate.shivamkareliya11.workers.dev");
-
 const envUrl = getEnvVar("BETTER_AUTH_URL");
 
-const baseURL = envUrl ? envUrl : (typeof process !== "undefined" && process.env.NODE_ENV === "development" ? "http://localhost:8080" : defaultProductionUrl);
-
+let baseURL = "http://localhost:8080";
+if (vercelProjectProductionUrl) {
+  baseURL = `https://${vercelProjectProductionUrl}`;
+} else if (vercelUrlEnv) {
+  baseURL = `https://${vercelUrlEnv}`;
+} else if (envUrl) {
+  baseURL = envUrl;
+}
 const trustedOrigins = [
   "http://localhost:8080",
   baseURL,
