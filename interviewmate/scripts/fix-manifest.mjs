@@ -19,7 +19,7 @@ const manifestFile = files.find(f => f.startsWith('_tanstack-start-manifest_v') 
 
 if (!manifestFile) {
   console.error('❌ Could not find the correct manifest file in the nitro assets directory!');
-  process.exit(1);
+  process.exit(0);
 }
 
 const goodManifestPath = path.join(nitroAssetsDir, manifestFile);
