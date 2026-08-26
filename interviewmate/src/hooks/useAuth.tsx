@@ -74,6 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading: isPending,
       signOut: async () => {
         await authClient.signOut();
+        setSessionData(null);
       },
       refreshProfile: async () => {
         // Handled automatically by Better Auth useSession
