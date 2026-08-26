@@ -153,20 +153,16 @@ Create a `.env` file in the project root:
 ```env
 # Authentication
 BETTER_AUTH_SECRET="your_secret_key_minimum_32_bytes"
-VITE_BETTER_AUTH_SECRET="your_secret_key_minimum_32_bytes"
 BETTER_AUTH_URL="http://localhost:8080"
-VITE_BETTER_AUTH_URL="http://localhost:8080"
 
 # Google OAuth
 GOOGLE_CLIENT_ID="your_google_client_id"
 GOOGLE_CLIENT_SECRET="your_google_client_secret"
-VITE_GOOGLE_CLIENT_ID="your_google_client_id"
 
 # Groq AI API
 GROQ_API_KEY="your_groq_api_key"
-VITE_GROQ_API_KEY="your_groq_api_key"
-VITE_GROQ_API_URL="https://api.groq.com/openai/v1"
-VITE_GROQ_MODEL="llama-3.1-8b-instant"
+GROQ_API_URL="https://api.groq.com/openai/v1"
+GROQ_MODEL="llama-3.1-8b-instant"
 ```
 
 ### Development

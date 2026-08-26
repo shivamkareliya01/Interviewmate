@@ -99,8 +99,8 @@ async function _getAuth() {
     const secret = _getEnv("BETTER_AUTH_SECRET") || "interviewmate_secret_key_32bytes_minimum_length_required";
     const envUrl = _getEnv("BETTER_AUTH_URL");
     const baseURL = envUrl || "https://interviewmate.shivamkareliya11.workers.dev";
-    const clientId = (_getEnv("GOOGLE_CLIENT_ID") || _getEnv("VITE_GOOGLE_CLIENT_ID")).trim();
-    const clientSecret = (_getEnv("GOOGLE_CLIENT_SECRET") || _getEnv("VITE_GOOGLE_CLIENT_SECRET")).trim();
+    const clientId = _getEnv("GOOGLE_CLIENT_ID").trim();
+    const clientSecret = _getEnv("GOOGLE_CLIENT_SECRET").trim();
 
     try {
       const dialect = new LibsqlDialect({ client: createClient({ url: "file:sqlite.db" }) });
@@ -150,8 +150,8 @@ async function _apiHandlers(request, url) {
 
       if (url.pathname === "/api/questions" || url.pathname === "/api/call" || url.pathname === "/api/chat") {
         const apiKey = _groqApiKey();
-        const baseUrl = _getEnvFromGlobal("GROQ_API_URL") || _getEnvFromGlobal("VITE_GROQ_API_URL") || "https://api.groq.com/openai/v1";
-        const model = _getEnvFromGlobal("GROQ_MODEL") || _getEnvFromGlobal("VITE_GROQ_MODEL") || "llama-3.1-8b-instant";
+        const baseUrl = _getEnvFromGlobal("GROQ_API_URL") || "https://api.groq.com/openai/v1";
+        const model = _getEnvFromGlobal("GROQ_MODEL") || "llama-3.1-8b-instant";
         const isChat = url.pathname === "/api/chat";
         const isJsonMode = url.pathname !== "/api/chat" ? true : false;
 
