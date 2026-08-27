@@ -44,6 +44,9 @@ export async function callGroqAPI(
     if (response.ok) {
       const text = await response.text();
       return text;
+    } else {
+      const errText = await response.text();
+      console.error(`[API Error] /api/call returned status ${response.status}:`, errText);
     }
   } catch (err) {
     console.warn("Server API /api/call failed:", err);
@@ -1688,6 +1691,9 @@ RESPONSE GUIDELINES:
       if (fullResponseText.trim()) {
         return fullResponseText.trim();
       }
+    } else {
+      const errText = await response.text();
+      console.error(`[API Error] /api/chat returned status ${response.status}:`, errText);
     }
   } catch (err) {
     console.warn("[Groq Chat Server Proxy Network Warning]:", err);
