@@ -49,26 +49,6 @@ export async function callGroqAPI(
     console.warn("Server API /api/call failed:", err);
   }
 
-  // Fallback JSON for question generation when endpoints are unconfigured
-  if (jsonMode) {
-    return JSON.stringify({
-      questions: [
-        {
-          id: 1,
-          type: "mcq",
-          title: "Optimizing Algorithm Complexity",
-          description: "What is the time complexity of searching an element in a balanced Binary Search Tree (BST)?",
-          options: ["O(1)", "O(log N)", "O(N)", "O(N log N)"],
-          correctAnswerIndex: 1,
-          explanation: "In a balanced BST, each comparison halves the search space, giving logarithmic time complexity O(log N).",
-          difficulty: "moderate",
-          timeLimit: 3,
-          tags: ["DSA", "MCQ"]
-        }
-      ]
-    });
-  }
-
   throw new Error("All Groq API endpoints failed or are unreachable.");
 }
 
@@ -1724,10 +1704,10 @@ RESPONSE GUIDELINES:
     console.warn("[Groq Non-Streaming API Warning]:", err);
   }
 
-  // Fallback 2: Domain-Aware Fallback Response Generator
-  const fallbackResponse = generateOfflineAITutorResponse(context, lastUserMsg);
-  onChunk(fallbackResponse);
-  return fallbackResponse;
+  // Fallback 2: Proper Error Response
+  const errorMessage = `⚠️ **AI Mentor Unavailable**\n\nI'm sorry, but I couldn't reach the AI server. Please check your API keys and ensure the selected model is valid and active.`;
+  onChunk(errorMessage);
+  return errorMessage;
 }
 
 export const streamGrokChat = streamGroqChat;
