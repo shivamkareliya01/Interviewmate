@@ -5,7 +5,7 @@ export async function handleApiQuestions(request: Request) {
 
     const apiKey = process.env.GROQ_API_KEY || "";
     const baseUrl = process.env.GROQ_API_URL || "https://api.groq.com/openai/v1";
-    const model = process.env.GROQ_MODEL || "llama-3.1-8b-instant";
+    const model = process.env.GROQ_MODEL || "openai/gpt-oss-20b";
 
     if (!apiKey || !apiKey.startsWith("gsk_")) {
       const response = await fetch("https://text.pollinations.ai/", {
@@ -67,7 +67,7 @@ export async function handleApiCall(request: Request) {
 
     const apiKey = process.env.GROQ_API_KEY || "";
     const baseUrl = process.env.GROQ_API_URL || "https://api.groq.com/openai/v1";
-    const model = process.env.GROQ_MODEL || "llama-3.1-8b-instant";
+    const model = process.env.GROQ_MODEL || "openai/gpt-oss-20b";
 
     if (!apiKey || !apiKey.startsWith("gsk_")) {
       const response = await fetch("https://text.pollinations.ai/", {
@@ -131,7 +131,7 @@ export async function handleApiChat(request: Request) {
 
     const apiKey = process.env.GROQ_API_KEY || "";
     const baseUrl = process.env.GROQ_API_URL || "https://api.groq.com/openai/v1";
-    const model = process.env.GROQ_MODEL || "llama-3.1-8b-instant";
+    const model = process.env.GROQ_MODEL || "openai/gpt-oss-20b";
 
     if (!apiKey || !apiKey.startsWith("gsk_")) {
       const response = await fetch("https://text.pollinations.ai/", {
