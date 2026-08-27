@@ -21,12 +21,12 @@ const vercelBranchUrl = getEnvVar("VERCEL_BRANCH_URL");
 const envUrl = getEnvVar("BETTER_AUTH_URL");
 
 export let baseURL = "http://localhost:8080";
-if (vercelProjectProductionUrl) {
+if (envUrl) {
+  baseURL = envUrl;
+} else if (vercelProjectProductionUrl) {
   baseURL = `https://${vercelProjectProductionUrl}`;
 } else if (vercelUrlEnv) {
   baseURL = `https://${vercelUrlEnv}`;
-} else if (envUrl) {
-  baseURL = envUrl;
 }
 const trustedOrigins = [
   "http://localhost:8080",
