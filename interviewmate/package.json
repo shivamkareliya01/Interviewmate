@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build && node scripts/fix-manifest.mjs",
+    "build": "node -e \"['dist', '.output', '.wrangler'].forEach(d => fs.rmSync(d, {recursive:true, force:true}))\" && vite build && node scripts/fix-manifest.mjs",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",

@@ -1,10 +1,7 @@
 name = "interviewmate"
-main = "dist/_worker.js/index.js"
+main = ".output/server/index.mjs"
 compatibility_date = "2024-03-01"
 compatibility_flags = ["nodejs_compat"]
 
 [assets]
-directory = "dist"
-
-[build]
-command = "npm run build"
+directory = ".output/public"
