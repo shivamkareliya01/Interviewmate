@@ -67,9 +67,12 @@ function Landing() {
   return (
     <div className="min-h-screen bg-background">
       <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6">
-        <span className="text-lg font-semibold tracking-tight">
-          Interview<span className="text-primary">Mate</span>
-        </span>
+        <Link to="/" className="flex items-center gap-2">
+          <img src="/logo.jpg" alt="InterviewMate Logo" className="h-8 w-auto rounded-md" />
+          <span className="text-lg font-semibold tracking-tight">
+            Interview<span className="text-primary">Mate</span>
+          </span>
+        </Link>
         <nav className="flex items-center gap-2">
           {session ? (
             <Button asChild size="sm">

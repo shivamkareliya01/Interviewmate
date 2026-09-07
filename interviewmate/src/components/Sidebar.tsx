@@ -58,9 +58,7 @@ export function Sidebar() {
           }}
           className="flex items-center gap-2.5 hover:opacity-90 transition-opacity cursor-pointer"
         >
-          <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-tr from-teal-500 to-cyan-400 text-slate-950 font-bold">
-            <Code2 className="size-4" />
-          </div>
+          <img src="/logo.jpg" alt="InterviewMate Logo" className="h-8 w-auto rounded-md" />
           <h2 className="font-bold text-base text-white">
             Interview<span className="text-teal-400">Mate</span>
           </h2>
@@ -102,9 +100,7 @@ export function Sidebar() {
             }}
             className="flex items-center gap-3 group hover:opacity-95 transition-opacity cursor-pointer"
           >
-            <div className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-tr from-teal-500 to-cyan-400 text-slate-950 font-bold shadow-lg shadow-teal-500/20 group-hover:scale-105 transition-transform">
-              <Code2 className="size-5" />
-            </div>
+            <img src="/logo.jpg" alt="InterviewMate Logo" className="h-9 w-auto rounded-md shadow-lg shadow-teal-500/20 group-hover:scale-105 transition-transform" />
             <div>
               <h2 className="font-bold text-lg leading-none tracking-tight text-white flex items-center gap-1.5">
                 Interview<span className="text-teal-400">Mate</span>
