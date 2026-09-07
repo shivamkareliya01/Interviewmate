@@ -99,6 +99,9 @@ export default async (env: any) => {
     nitro: {
       entry: './src/server.ts',
       preset: 'cloudflare',
+      alias: {
+        'ws': './src/lib/ws-stub.ts'
+      }
     },
   })(env);
 
