@@ -46,9 +46,8 @@ if (!clientId || !clientSecret) {
 } else {
   console.log(`[Better Auth] Configured Google Auth for Client ID: ${clientId.slice(0, 20)}...`);
 }
-
-import { LibsqlDialect } from "@libsql/kysely-libsql";
-import { createClient } from "@libsql/client";
+import { LibsqlDialect } from "./libsql-dialect";
+import { createClient } from "@libsql/client/web";
 
 let authInstance: ReturnType<typeof betterAuth>;
 try {
