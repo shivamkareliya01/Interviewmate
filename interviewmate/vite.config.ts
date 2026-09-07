@@ -98,7 +98,7 @@ export default async (env: any) => {
     },
     nitro: {
       entry: './src/server.ts',
-      preset: 'vercel',
+      preset: 'cloudflare',
     },
   })(env);
 
