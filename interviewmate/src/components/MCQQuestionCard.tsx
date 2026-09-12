@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   HelpCircle,
   CheckCircle2,
@@ -19,7 +19,7 @@ interface MCQQuestionCardProps {
   onNext: () => void;
 }
 
-export function MCQQuestionCard({
+export const MCQQuestionCard = React.memo(function MCQQuestionCard({
   question,
   questionNumber,
   totalQuestions,
@@ -204,4 +204,4 @@ export function MCQQuestionCard({
       </div>
     </div>
   );
-}
+});

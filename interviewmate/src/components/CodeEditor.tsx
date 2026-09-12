@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Editor, { type OnMount } from "@monaco-editor/react";
 import {
   Code2,
@@ -26,7 +26,7 @@ interface CodeEditorProps {
   compileErrorMsg?: string;
 }
 
-export function CodeEditor({
+export const CodeEditor = React.memo(function CodeEditor({
   value,
   onChange,
   language = "python",
@@ -270,4 +270,4 @@ export function CodeEditor({
       </div>
     </div>
   );
-}
+});

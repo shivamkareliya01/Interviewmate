@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Code2,
   Timer,
@@ -274,10 +274,13 @@ function SessionPage() {
     return () => clearInterval(timer);
   }, [timerRunning, timeLeft]);
 
-  // Autosave code on change
+  // Autosave code on change (debounced)
   useEffect(() => {
     if (session?.status === "ready" && currentIndex >= 8 && currentIndex < 10) {
-      saveDraftCode(userId, `${session.id}_q${currentIndex}`, solutionText);
+      const timer = setTimeout(() => {
+        saveDraftCode(userId, `${session.id}_q${currentIndex}`, solutionText);
+      }, 500);
+      return () => clearTimeout(timer);
     }
   }, [solutionText, session?.id, currentIndex]);
 
@@ -288,7 +291,7 @@ function SessionPage() {
   };
 
   // MCQ Answer Submission Handler
-  const handleMCQAnswerSubmit = (selectedIndex: number, isCorrect: boolean) => {
+  const handleMCQAnswerSubmit = useCallback((selectedIndex: number, isCorrect: boolean) => {
     if (!session || questions.length <= currentIndex) return;
 
     const currentQ = questions[currentIndex];
@@ -307,10 +310,10 @@ function SessionPage() {
     });
 
     if (updatedSession) setSession(updatedSession);
-  };
+  }, [session, questions, currentIndex]);
 
   // Move to Next Question
-  const handleNextQuestion = () => {
+  const handleNextQuestion = useCallback(() => {
     if (!session) return;
 
     // Auto-evaluate / record score for coding/theory question
@@ -346,7 +349,7 @@ function SessionPage() {
     setCurrentIndex(nextIdx);
     updateSessionRecord(session.id, { currentQuestionIndex: nextIdx });
     initQuestionIndex(session, nextIdx);
-  };
+  }, [session, questions, currentIndex]);
 
   // Submit Solution for Grok AI Evaluation (Coding/Theory)
   const handleSubmitCodingSolution = async () => {
@@ -688,7 +691,7 @@ function SessionPage() {
           totalQuestions={10}
           domainName={session.domainName}
           difficulty={session.difficulty}
-          onAnswerEvaluated={(score, userText) => {
+          onAnswerEvaluated={useCallback((score, userText) => {
             handleCodingEvaluated({
               correctness: score,
               efficiency: score,
@@ -697,7 +700,7 @@ function SessionPage() {
               overallScore: score,
               feedback: [{ type: "strength", text: `Evaluated response: ${userText.slice(0, 50)}...` }],
             });
-          }}
+          }, [])}
           onNextQuestion={handleNextQuestion}
         />
       ) : currentQ.type === "mcq" ? (
@@ -749,11 +752,11 @@ function SessionPage() {
                   value={solutionText}
                   onChange={setSolutionText}
                   language={selectedLanguage}
-                  onLanguageChange={(newLang, newCode) => {
+                  onLanguageChange={useCallback((newLang, newCode) => {
                     setSelectedLanguage(newLang);
                     setSolutionText(newCode);
                     saveDraftCode(userId, `${session.id}_q${currentIndex}`, newCode);
-                  }}
+                  }, [userId, session.id, currentIndex])}
                   questionTitle={currentQ.title}
                   baseStarterCode={currentQ.starterCode}
                 />

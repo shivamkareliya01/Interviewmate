@@ -20,41 +20,86 @@ export interface PracticeSession {
 }
 
 const SESSIONS_STORAGE_KEY = "interviewmate_practice_sessions";
+const MASTER_KEY = "interviewmate_session_ids";
+
+let migrationDone = false;
+function migrateLegacyData() {
+  if (typeof window === "undefined" || migrationDone) return;
+  const raw = localStorage.getItem(SESSIONS_STORAGE_KEY);
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0 && typeof parsed[0] === 'object') {
+        const ids: string[] = [];
+        parsed.forEach(s => {
+          if (s && s.id) {
+            ids.push(s.id);
+            localStorage.setItem(`interviewmate_session_${s.id}`, JSON.stringify(s));
+          }
+        });
+        localStorage.setItem(MASTER_KEY, JSON.stringify(ids));
+        localStorage.removeItem(SESSIONS_STORAGE_KEY);
+        console.log(`[SessionStore] Migrated ${ids.length} legacy sessions to new format.`);
+      }
+    } catch {}
+  }
+  migrationDone = true;
+}
+
+function processSession(s: any): PracticeSession {
+  const codingScores = s.codingScores || {};
+  const scoreValues = Object.values(codingScores) as number[];
+  const calculatedCodingScore =
+    scoreValues.length > 0
+      ? Math.round(scoreValues.reduce((a, b) => a + b, 0) / scoreValues.length)
+      : typeof s.codingScore === "number"
+      ? s.codingScore
+      : 0;
+
+  return {
+    ...s,
+    questions: Array.isArray(s.questions) ? s.questions : [],
+    mcqAnswers: s.mcqAnswers || {},
+    mcqScore: typeof s.mcqScore === "number" ? s.mcqScore : 0,
+    codingScores,
+    codingScore: calculatedCodingScore,
+    currentQuestionIndex: typeof s.currentQuestionIndex === "number" ? s.currentQuestionIndex : 0,
+  };
+}
 
 export function getAllSessions(): PracticeSession[] {
   if (typeof window === "undefined") return [];
+  migrateLegacyData();
   try {
-    const raw = localStorage.getItem(SESSIONS_STORAGE_KEY);
-    if (!raw) return [];
-    const parsed: PracticeSession[] = JSON.parse(raw);
-    return parsed.map((s) => {
-      const codingScores = s.codingScores || {};
-      const scoreValues = Object.values(codingScores);
-      const calculatedCodingScore =
-        scoreValues.length > 0
-          ? Math.round(scoreValues.reduce((a, b) => a + b, 0) / scoreValues.length)
-          : typeof s.codingScore === "number"
-          ? s.codingScore
-          : 0;
-
-      return {
-        ...s,
-        questions: Array.isArray(s.questions) ? s.questions : [],
-        mcqAnswers: s.mcqAnswers || {},
-        mcqScore: typeof s.mcqScore === "number" ? s.mcqScore : 0,
-        codingScores,
-        codingScore: calculatedCodingScore,
-        currentQuestionIndex: typeof s.currentQuestionIndex === "number" ? s.currentQuestionIndex : 0,
-      };
+    const rawIds = localStorage.getItem(MASTER_KEY);
+    if (!rawIds) return [];
+    const ids: string[] = JSON.parse(rawIds);
+    const sessions: PracticeSession[] = [];
+    
+    ids.forEach(id => {
+       const rawSession = localStorage.getItem(`interviewmate_session_${id}`);
+       if (rawSession) {
+          try {
+             sessions.push(processSession(JSON.parse(rawSession)));
+          } catch {}
+       }
     });
+    return sessions;
   } catch {
     return [];
   }
 }
 
 export function getSessionById(sessionId: string): PracticeSession | null {
-  const sessions = getAllSessions();
-  return sessions.find((s) => s.id === sessionId) || null;
+  if (typeof window === "undefined") return null;
+  migrateLegacyData();
+  const rawSession = localStorage.getItem(`interviewmate_session_${sessionId}`);
+  if (!rawSession) return null;
+  try {
+     return processSession(JSON.parse(rawSession));
+  } catch {
+     return null;
+  }
 }
 
 export function createSessionRecord(params: {
@@ -84,8 +129,15 @@ export function createSessionRecord(params: {
   };
 
   if (typeof window !== "undefined") {
-    const existing = getAllSessions();
-    localStorage.setItem(SESSIONS_STORAGE_KEY, JSON.stringify([newSession, ...existing]));
+    migrateLegacyData();
+    let ids: string[] = [];
+    const rawIds = localStorage.getItem(MASTER_KEY);
+    if (rawIds) {
+      try { ids = JSON.parse(rawIds); } catch {}
+    }
+    ids = [newSession.id, ...ids];
+    localStorage.setItem(MASTER_KEY, JSON.stringify(ids));
+    localStorage.setItem(`interviewmate_session_${newSession.id}`, JSON.stringify(newSession));
   }
 
   return newSession;
@@ -96,16 +148,19 @@ export function updateSessionRecord(
   updates: Partial<PracticeSession>
 ): PracticeSession | null {
   if (typeof window === "undefined") return null;
+  migrateLegacyData();
 
-  const sessions = getAllSessions();
-  const index = sessions.findIndex((s) => s.id === sessionId);
-  if (index === -1) return null;
+  const rawSession = localStorage.getItem(`interviewmate_session_${sessionId}`);
+  if (!rawSession) return null;
 
-  const updatedSession = { ...sessions[index], ...updates };
-  sessions[index] = updatedSession;
-  localStorage.setItem(SESSIONS_STORAGE_KEY, JSON.stringify(sessions));
-
-  return updatedSession;
+  try {
+    const session = JSON.parse(rawSession);
+    const updatedSession = { ...session, ...updates };
+    localStorage.setItem(`interviewmate_session_${sessionId}`, JSON.stringify(updatedSession));
+    return processSession(updatedSession);
+  } catch {
+    return null;
+  }
 }
 
 const SEEN_TITLES_STORAGE_KEY = "interviewmate_seen_questions";

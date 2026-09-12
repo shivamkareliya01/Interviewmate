@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Bot, Send, Sparkles, CheckCircle2, AlertCircle, RefreshCw, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,7 +16,7 @@ interface ConversationalMockCardProps {
   onNextQuestion: () => void;
 }
 
-export function ConversationalMockCard({
+export const ConversationalMockCard = React.memo(function ConversationalMockCard({
   question,
   questionIndex,
   totalQuestions,
@@ -186,4 +186,4 @@ export function ConversationalMockCard({
       </div>
     </div>
   );
-}
+});
