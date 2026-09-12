@@ -443,6 +443,33 @@ function SessionPage() {
     await handleSubmitCodingSolution();
   };
 
+  const handleAnswerEvaluated = useCallback((score: number, userText: string) => {
+    if (!session) return;
+    const currentCodingScores = session.codingScores || {};
+    const updatedCodingScores = { ...currentCodingScores, [currentIndex]: score };
+    const codingCount = questions.filter(q => q.type === "coding" || q.type === "theory").length || 2;
+    let totalScore = 0;
+    Object.values(updatedCodingScores).forEach(s => totalScore += s);
+    const averageCodingScore = Math.round(totalScore / codingCount);
+
+    const updatedSession = updateSessionRecord(session.id, {
+      codingScores: updatedCodingScores,
+      codingScore: averageCodingScore,
+    });
+
+    if (updatedSession) {
+      setSession(updatedSession);
+    }
+  }, [session, currentIndex, questions]);
+
+  const handleLanguageChange = useCallback((newLang: string, newCode: string) => {
+    setSelectedLanguage(newLang);
+    setSolutionText(newCode);
+    if (session?.id) {
+      saveDraftCode(userId, `${session.id}_q${currentIndex}`, newCode);
+    }
+  }, [userId, session?.id, currentIndex]);
+
   // If Session Record Not Found
   if (!session) {
     return (
@@ -691,16 +718,7 @@ function SessionPage() {
           totalQuestions={10}
           domainName={session.domainName}
           difficulty={session.difficulty}
-          onAnswerEvaluated={useCallback((score, userText) => {
-            handleCodingEvaluated({
-              correctness: score,
-              efficiency: score,
-              codeQuality: score,
-              testCases: 100,
-              overallScore: score,
-              feedback: [{ type: "strength", text: `Evaluated response: ${userText.slice(0, 50)}...` }],
-            });
-          }, [])}
+          onAnswerEvaluated={handleAnswerEvaluated}
           onNextQuestion={handleNextQuestion}
         />
       ) : currentQ.type === "mcq" ? (
@@ -752,11 +770,7 @@ function SessionPage() {
                   value={solutionText}
                   onChange={setSolutionText}
                   language={selectedLanguage}
-                  onLanguageChange={useCallback((newLang, newCode) => {
-                    setSelectedLanguage(newLang);
-                    setSolutionText(newCode);
-                    saveDraftCode(userId, `${session.id}_q${currentIndex}`, newCode);
-                  }, [userId, session.id, currentIndex])}
+                  onLanguageChange={handleLanguageChange}
                   questionTitle={currentQ.title}
                   baseStarterCode={currentQ.starterCode}
                 />
