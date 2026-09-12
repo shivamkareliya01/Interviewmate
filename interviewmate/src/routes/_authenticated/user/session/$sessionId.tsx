@@ -293,11 +293,17 @@ function SessionPage() {
 
     const currentQ = questions[currentIndex];
     const updatedAnswers = { ...(session.mcqAnswers || {}), [currentQ.id]: selectedIndex };
-    const updatedScore = (session.mcqScore || 0) + (isCorrect ? 1 : 0);
+    
+    let actualMcqCorrect = 0;
+    questions.forEach((q) => {
+      if (q.type === "mcq" && updatedAnswers[q.id] === q.correctAnswerIndex) {
+        actualMcqCorrect++;
+      }
+    });
 
     const updatedSession = updateSessionRecord(session.id, {
       mcqAnswers: updatedAnswers,
-      mcqScore: updatedScore,
+      mcqScore: actualMcqCorrect,
     });
 
     if (updatedSession) setSession(updatedSession);
@@ -307,21 +313,20 @@ function SessionPage() {
   const handleNextQuestion = () => {
     if (!session) return;
 
-    // Auto-evaluate / record score for coding/theory question if solutionText was typed
+    // Auto-evaluate / record score for coding/theory question
     const currentQ = questions[currentIndex];
-    if (currentQ && (currentQ.type === "coding" || currentQ.type === "theory") && solutionText.trim()) {
+    if (currentQ && (currentQ.type === "coding" || currentQ.type === "theory")) {
       const currentCodingScores = session.codingScores || {};
       if (currentCodingScores[currentIndex] === undefined) {
-        const isMeaningful = solutionText.trim().length > 15;
-        const autoScore = isMeaningful ? 80 : 40;
-        const updatedCodingScores = { ...currentCodingScores, [currentIndex]: autoScore };
-        const scoreValues = Object.values(updatedCodingScores);
-        const averageCodingScore = Math.round(
-          scoreValues.reduce((sum, s) => sum + s, 0) / scoreValues.length
-        );
+        // Record 0 for unattempted/unevaluated questions instead of giving a free 80.
+        const updatedCodingScores = { ...currentCodingScores, [currentIndex]: 0 };
+        const codingCount = questions.filter(q => q.type === "coding" || q.type === "theory").length || 2;
+        let totalScore = 0;
+        Object.values(updatedCodingScores).forEach(s => totalScore += s);
+        
         updateSessionRecord(session.id, {
           codingScores: updatedCodingScores,
-          codingScore: averageCodingScore,
+          codingScore: Math.round(totalScore / codingCount),
         });
       }
     }
@@ -403,10 +408,10 @@ function SessionPage() {
 
       const currentCodingScores = session.codingScores || {};
       const updatedCodingScores = { ...currentCodingScores, [currentIndex]: res.overallScore };
-      const scoreValues = Object.values(updatedCodingScores);
-      const averageCodingScore = Math.round(
-        scoreValues.reduce((sum, s) => sum + s, 0) / scoreValues.length
-      );
+      const codingCount = questions.filter(q => q.type === "coding" || q.type === "theory").length || 2;
+      let totalScore = 0;
+      Object.values(updatedCodingScores).forEach(s => totalScore += s);
+      const averageCodingScore = Math.round(totalScore / codingCount);
 
       const updatedSession = updateSessionRecord(session.id, {
         codingScores: updatedCodingScores,
@@ -539,9 +544,36 @@ function SessionPage() {
             const hasTheoryQ = questions.some((q) => q.type === "theory") || !isTechSoftwareDomain(session.branchName, session.domainName);
             const scoreLabel = hasTheoryQ ? "Theory Score" : "Coding Score";
 
-            const rawMcqCount = session.mcqScore ?? 0;
-            const mcqPercentage = Math.min(100, Math.round((rawMcqCount / 8) * 100));
-            const codingScoreVal = session.codingScore ?? 0;
+            // MCQ Score: Compute dynamically based on actual correct answers
+            const mcqQuestions = questions.filter(q => q.type === "mcq");
+            const totalMcq = mcqQuestions.length || 8;
+            let actualMcqCorrect = 0;
+            mcqQuestions.forEach((q) => {
+              if (session.mcqAnswers && session.mcqAnswers[q.id] === q.correctAnswerIndex) {
+                actualMcqCorrect++;
+              }
+            });
+            const mcqPercentage = Math.min(100, Math.round((actualMcqCorrect / totalMcq) * 100));
+
+            // Coding Score: compute from actual evaluations, properly handling unattempted
+            const codingQuestions = questions.map((q, idx) => ({ q, idx })).filter(x => x.q.type === "coding" || x.q.type === "theory");
+            const totalCoding = codingQuestions.length || 2;
+            let totalCodingScore = 0;
+            let evaluatedCount = 0;
+
+            codingQuestions.forEach(({ idx }) => {
+              if (session.codingScores && session.codingScores[idx] !== undefined) {
+                 if (session.codingScores[idx] > 0) {
+                     evaluatedCount++;
+                 }
+                 totalCodingScore += session.codingScores[idx];
+              }
+            });
+            
+            const codingScoreVal = Math.round(totalCodingScore / totalCoding);
+            const isUnattempted = evaluatedCount === 0 && codingScoreVal === 0;
+            const codingStatusLabel = isUnattempted ? "Not Attempted" : "Evaluated by InterviewMate AI";
+
             const earnedXP = Math.round((mcqPercentage * 1.5) + (codingScoreVal * 1.0));
 
             return (
@@ -551,7 +583,7 @@ function SessionPage() {
                   <p className="text-2xl font-bold text-teal-400">
                     {mcqPercentage}%
                   </p>
-                  <p className="text-[10px] text-slate-500">{rawMcqCount}/8 Correct</p>
+                  <p className="text-[10px] text-slate-500">{actualMcqCorrect}/{totalMcq} Correct</p>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-1">
@@ -559,7 +591,7 @@ function SessionPage() {
                   <p className="text-2xl font-bold text-cyan-400">
                     {codingScoreVal}/100
                   </p>
-                  <p className="text-[10px] text-slate-500">Evaluated by InterviewMate AI</p>
+                  <p className={`text-[10px] ${isUnattempted ? "text-amber-500 font-medium" : "text-slate-500"}`}>{codingStatusLabel}</p>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-1">
